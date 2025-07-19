@@ -39,7 +39,14 @@ echo -e "${GREEN}✅ Chrome found: $CHROME_CMD${NC}"
 
 # Check required files
 echo -e "${YELLOW}📁 Checking extension files...${NC}"
-required_files=("manifest.json" "content.js" "popup.html" "popup.js" "styles.css")
+required_files=(
+    "src/manifest.json" 
+    "src/content/content.js" 
+    "src/popup/popup.html" 
+    "src/popup/popup.js" 
+    "src/content/styles.css"
+    "src/popup/popup.css"
+)
 
 for file in "${required_files[@]}"; do
     if [ -f "$file" ]; then
@@ -55,7 +62,7 @@ echo -e "${YELLOW}🎨 Checking icon files...${NC}"
 icon_sizes=("16" "32" "48" "128")
 
 for size in "${icon_sizes[@]}"; do
-    icon_file="icons/icon${size}.png"
+    icon_file="src/assets/icons/icon${size}.png"
     if [ -f "$icon_file" ]; then
         echo -e "${GREEN}✓${NC} ${icon_file}"
         # Check if it's actually a PNG file
@@ -73,7 +80,7 @@ done
 echo -e "${YELLOW}🔍 Validating manifest.json...${NC}"
 
 # Check JSON syntax
-if python3 -m json.tool manifest.json > /dev/null 2>&1; then
+if python3 -m json.tool src/manifest.json > /dev/null 2>&1; then
     echo -e "${GREEN}✓${NC} Valid JSON syntax"
 else
     echo -e "${RED}✗${NC} Invalid JSON syntax in manifest.json"
@@ -81,7 +88,7 @@ else
 fi
 
 # Check manifest version
-manifest_version=$(grep '"manifest_version"' manifest.json | grep -o '[0-9]')
+manifest_version=$(grep '"manifest_version"' src/manifest.json | grep -o '[0-9]')
 if [ "$manifest_version" = "3" ]; then
     echo -e "${GREEN}✓${NC} Using Manifest V3"
 else
@@ -91,7 +98,7 @@ fi
 # Check for required fields
 required_manifest_fields=("name" "version" "description" "permissions" "action" "icons")
 for field in "${required_manifest_fields[@]}"; do
-    if grep -q "\"$field\"" manifest.json; then
+    if grep -q "\"$field\"" src/manifest.json; then
         echo -e "${GREEN}✓${NC} Has $field"
     else
         echo -e "${RED}✗${NC} Missing $field in manifest"
@@ -102,7 +109,8 @@ done
 echo -e "${YELLOW}📏 Checking file sizes...${NC}"
 total_size=0
 
-for file in *.js *.html *.css *.json; do
+cd src/
+for file in $(find . -name "*.js" -o -name "*.html" -o -name "*.css" -o -name "*.json"); do
     if [ -f "$file" ]; then
         size=$(wc -c < "$file")
         total_size=$((total_size + size))
@@ -113,6 +121,7 @@ for file in *.js *.html *.css *.json; do
         fi
     fi
 done
+cd ..
 
 echo -e "${BLUE}📦 Total extension size: $((total_size / 1024))KB${NC}"
 
@@ -120,17 +129,17 @@ echo -e "${BLUE}📦 Total extension size: $((total_size / 1024))KB${NC}"
 echo -e "${YELLOW}⚡ Performance checks...${NC}"
 
 # Check for console.log statements (should be removed in production)
-log_count=$(grep -r "console\.log" *.js | wc -l)
+log_count=$(find src/ -name "*.js" -exec grep -l "console\.log" {} \; | wc -l)
 if [ $log_count -gt 0 ]; then
-    echo -e "${YELLOW}⚠️${NC}  Found $log_count console.log statements (consider removing for production)"
+    echo -e "${YELLOW}⚠️${NC}  Found console.log statements in $log_count files (consider removing for production)"
 else
     echo -e "${GREEN}✓${NC} No console.log statements found"
 fi
 
 # Check for setTimeout/setInterval usage
-timer_count=$(grep -r "setTimeout\|setInterval" *.js | wc -l)
+timer_count=$(find src/ -name "*.js" -exec grep -l "setTimeout\|setInterval" {} \; | wc -l)
 if [ $timer_count -gt 0 ]; then
-    echo -e "${BLUE}ℹ️${NC}  Found $timer_count timer functions (verify they're necessary)"
+    echo -e "${BLUE}ℹ️${NC}  Found timer functions in $timer_count files (verify they're necessary)"
 else
     echo -e "${GREEN}✓${NC} No timer functions found"
 fi

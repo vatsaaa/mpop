@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <div class="header">
+        <div class="logo">M</div>
+        <h1 class="title">Medium Public Only</h1>
+        <p class="subtitle">Remove member-only stories</p>
+    </div>
+    
+    <div class="status">
+        <p class="status-text" id="statusText">✅ Active on Medium</p>
+        <p class="status-detail" id="statusDetail">Extension is running and filtering content</p>
+    </div>
+    
+    <div class="stats">
+        <div class="stat">
+            <p class="stat-number" id="hiddenCount">0</p>
+            <p class="stat-label">Stories Hidden</p>
+        </div>
+        <div class="stat">
+            <p class="stat-number" id="publicCount">∞</p>
+            <p class="stat-label">Public Stories</p>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button class="btn" id="refreshBtn">Refresh Page</button>
+        <button class="btn btn-secondary" id="toggleBtn">Disable</button>
+    </div>
+    
+    <div class="footer">
+        <p>Version 1.0 | Made for public content</p>
+    </div>
+
+    <script src="popup.js"></script>
+</body>
+</html>

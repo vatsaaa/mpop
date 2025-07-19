@@ -39,6 +39,20 @@
                 '.post-preview',
                 '.post',
                 '.story'
+            ],
+            // Recommended sections to check for emptiness
+            recommendedSections: [
+                '[data-testid="recommendedFromMedium"]',
+                '[data-testid="recommended-from-medium"]',
+                '.recommended-from-medium',
+                'section:has(h2:contains("Recommended from Medium"))',
+                'section:has(h3:contains("Recommended from Medium"))',
+                'div:has(h2:contains("Recommended from Medium"))',
+                'div:has(h3:contains("Recommended from Medium"))',
+                // Additional patterns for recommended sections
+                '[class*="recommended"]',
+                '[data-module="recommended"]',
+                '[data-testid*="recommended"]'
             ]
         },
         keywords: [
@@ -52,6 +66,149 @@
             'subscriber only'
         ]
     };
+
+    // Debug function to find all sections with "recommended" text
+    function debugRecommendedSections() {
+        console.log('MPOP: === DEBUGGING RECOMMENDED SECTIONS ===');
+        
+        // Find all sections containing "recommended" text
+        const allElements = document.querySelectorAll('*');
+        const recommendedElements = Array.from(allElements).filter(el => {
+            const text = el.textContent?.toLowerCase() || '';
+            return text.includes('recommended from medium') || 
+                   text.includes('recommended') && text.includes('medium');
+        });
+        
+        console.log(`MPOP: Found ${recommendedElements.length} elements containing "recommended" text`);
+        
+        recommendedElements.forEach((el, index) => {
+            console.log(`MPOP: Element ${index + 1}:`, el);
+            console.log(`MPOP: Tag: ${el.tagName}, Classes: ${el.className}`);
+            console.log(`MPOP: Text (first 100 chars): ${el.textContent?.substring(0, 100)}`);
+            
+            // Check for stories within this element
+            const stories = el.querySelectorAll(config.selectors.storyContainers.join(', '));
+            const hiddenStories = Array.from(stories).filter(story => story.hasAttribute('data-mpop-hidden'));
+            console.log(`MPOP: Contains ${stories.length} stories, ${hiddenStories.length} hidden`);
+            console.log('---');
+        });
+        
+        console.log('MPOP: === END DEBUGGING ===');
+    }
+
+    // Function to check and hide empty recommended sections
+    function hideEmptyRecommendedSections() {
+        if (!extensionEnabled) {
+            return 0;
+        }
+
+        let hiddenSections = 0;
+        console.log('MPOP: Starting hideEmptyRecommendedSections...');
+        
+        // Debug what's on the page
+        debugRecommendedSections();
+
+        // Method 1: Find all elements containing "Recommended from Medium" text
+        const allElements = document.querySelectorAll('*');
+        const recommendedElements = Array.from(allElements).filter(el => {
+            const text = el.textContent?.toLowerCase() || '';
+            return (text.includes('recommended from medium') || 
+                   (text.includes('recommended') && text.includes('medium')) ||
+                   text.includes('more from medium')) && 
+                   el.children.length > 0; // Only consider containers with children
+        });
+
+        console.log(`MPOP: Found ${recommendedElements.length} elements with recommended text`);
+
+        recommendedElements.forEach(element => {
+            if (element.hasAttribute('data-mpop-section-checked')) {
+                return; // Skip already checked elements
+            }
+            
+            element.setAttribute('data-mpop-section-checked', 'true');
+            
+            // Check if this element or any parent contains stories
+            let containerToCheck = element;
+            let parentContainer = element.closest('section, div[class*="container"], div[class*="section"], aside');
+            if (parentContainer && parentContainer !== element) {
+                containerToCheck = parentContainer;
+            }
+            
+            // Look for stories in this container
+            const stories = containerToCheck.querySelectorAll(config.selectors.storyContainers.join(', '));
+            const visibleStories = Array.from(stories).filter(story => 
+                !story.hasAttribute('data-mpop-hidden') && 
+                story.offsetHeight > 0 && 
+                story.offsetWidth > 0
+            );
+            
+            console.log(`MPOP: Container has ${stories.length} total stories, ${visibleStories.length} visible`);
+            
+            // If all stories are hidden or there are no meaningful links, hide the section
+            if (stories.length > 0 && visibleStories.length === 0) {
+                containerToCheck.style.display = 'none';
+                containerToCheck.setAttribute('data-mpop-section-hidden', 'true');
+                hiddenSections++;
+                console.log('MPOP: Hidden empty recommended section (method 1)');
+            } else if (stories.length === 0) {
+                // Check for any meaningful content links
+                const meaningfulLinks = Array.from(containerToCheck.querySelectorAll('a[href*="/@"], a[href*="/story/"], a[href*="medium.com"]')).filter(link => 
+                    link.offsetHeight > 0 && 
+                    link.offsetWidth > 0 && 
+                    !link.closest('[data-mpop-hidden]')
+                );
+                
+                console.log(`MPOP: Container has ${meaningfulLinks.length} meaningful links`);
+                
+                if (meaningfulLinks.length === 0) {
+                    containerToCheck.style.display = 'none';
+                    containerToCheck.setAttribute('data-mpop-section-hidden', 'true');
+                    hiddenSections++;
+                    console.log('MPOP: Hidden empty recommended section with no content (method 1)');
+                }
+            }
+        });
+
+        // Method 2: Look for specific data attributes and selectors
+        const specificSelectors = [
+            '[data-testid*="recommend"]',
+            '[class*="recommend"]',
+            'section:has(h2:contains("Recommended"))',
+            'section:has(h3:contains("Recommended"))',
+            'div:has(h2:contains("Recommended"))',
+            'div:has(h3:contains("Recommended"))'
+        ];
+
+        specificSelectors.forEach(selector => {
+            try {
+                const elements = document.querySelectorAll(selector);
+                elements.forEach(element => {
+                    if (!element.hasAttribute('data-mpop-section-checked')) {
+                        element.setAttribute('data-mpop-section-checked', 'true');
+                        
+                        const stories = element.querySelectorAll(config.selectors.storyContainers.join(', '));
+                        const visibleStories = Array.from(stories).filter(story => 
+                            !story.hasAttribute('data-mpop-hidden') && 
+                            story.offsetHeight > 0 && 
+                            story.offsetWidth > 0
+                        );
+                        
+                        if (stories.length > 0 && visibleStories.length === 0) {
+                            element.style.display = 'none';
+                            element.setAttribute('data-mpop-section-hidden', 'true');
+                            hiddenSections++;
+                            console.log('MPOP: Hidden empty recommended section (method 2)');
+                        }
+                    }
+                });
+            } catch (e) {
+                // Ignore selector errors
+            }
+        });
+
+        console.log(`MPOP: hideEmptyRecommendedSections completed, hidden ${hiddenSections} sections`);
+        return hiddenSections;
+    }
 
     // Function to check if an element contains member-only indicators
     function isMemberOnlyContent(element) {
@@ -135,8 +292,26 @@
         if (removedCount > 0) {
             requestAnimationFrame(() => {
                 cleanupGaps();
+                // Trigger section hiding immediately and then again with delays
+                hideEmptyRecommendedSections();
+                setTimeout(() => {
+                    hideEmptyRecommendedSections();
+                }, 100);
+                setTimeout(() => {
+                    hideEmptyRecommendedSections();
+                }, 500);
             });
             console.log(`MPOP: Hidden ${removedCount} member-only stories (total: ${totalHiddenCount})`);
+        } else {
+            // Even if no new stories were removed, check for empty sections multiple times
+            // in case sections became empty due to previous removals
+            hideEmptyRecommendedSections();
+            setTimeout(() => {
+                hideEmptyRecommendedSections();
+            }, 100);
+            setTimeout(() => {
+                hideEmptyRecommendedSections();
+            }, 300);
         }
 
         return removedCount;
@@ -232,6 +407,16 @@
         
         // Also run periodically as a fallback
         setInterval(removeMemberOnlyStories, 2000);
+        
+        // Run section cleanup after page loads completely
+        setTimeout(() => {
+            hideEmptyRecommendedSections();
+        }, 3000);
+        
+        // Additional cleanup for dynamic content
+        setTimeout(() => {
+            hideEmptyRecommendedSections();
+        }, 5000);
     }
 
     // Wait for DOM to be ready
@@ -280,8 +465,16 @@
                 spacer.style.display = '';
                 spacer.removeAttribute('data-mpop-spacer-hidden');
             });
+
+            // Restore hidden sections
+            const hiddenSections = document.querySelectorAll('[data-mpop-section-hidden]');
+            hiddenSections.forEach(section => {
+                section.style.display = '';
+                section.removeAttribute('data-mpop-section-hidden');
+                section.removeAttribute('data-mpop-section-checked');
+            });
             
-            console.log('MPOP: Extension disabled - restored all stories');
+            console.log('MPOP: Extension disabled - restored all stories and sections');
         } else if (request.action === 'enable') {
             extensionEnabled = true;
             totalHiddenCount = 0; // Reset counter

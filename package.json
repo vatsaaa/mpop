@@ -1,0 +1,46 @@
+{
+  "name": "mpop",
+  "version": "1.0.0",
+  "description": "Medium Public Only Posts - Clean Medium reading experience by removing member-only stories",
+  "main": "src/manifest.json",
+  "scripts": {
+    "build": "./scripts/production_build.sh",
+    "package": "./scripts/package.sh",
+    "test": "./scripts/test_extension.sh",
+    "install-dev": "./scripts/install.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vatsaaa/mpop.git"
+  },
+  "keywords": [
+    "chrome-extension",
+    "medium",
+    "content-filter",
+    "member-only",
+    "paywall",
+    "productivity"
+  ],
+  "author": "Ankur Vatsa",
+  "license": "MIT",
+  "homepage": "https://github.com/vatsaaa/mpop",
+  "bugs": {
+    "url": "https://github.com/vatsaaa/mpop/issues"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "devDependencies": {},
+  "dependencies": {},
+  "extensionInfo": {
+    "manifestVersion": 3,
+    "chromeVersion": "88+",
+    "permissions": [
+      "activeTab"
+    ],
+    "hostPermissions": [
+      "*://*.medium.com/*",
+      "*://medium.com/*"
+    ]
+  }
+}

@@ -16,6 +16,17 @@
     display: none !important;
 }
 
+/* Hide empty recommended sections */
+[data-mpop-section-hidden] {
+    display: none !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transition: opacity 0.3s ease-out !important;
+}
+
 /* Ensure member-only overlays are also hidden */
 .member-preview-overlay,
 .paywall-preview,

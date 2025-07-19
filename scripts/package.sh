@@ -8,7 +8,7 @@ echo "=================================================================="
 
 # Set variables
 EXTENSION_NAME="medium-public-only-posts"
-VERSION=$(grep '"version"' manifest.json | sed 's/.*"version": *"\([^"]*\)".*/\1/')
+VERSION=$(grep '"version"' src/manifest.json | sed 's/.*"version": *"\([^"]*\)".*/\1/')
 PACKAGE_NAME="${EXTENSION_NAME}-v${VERSION}"
 TEMP_DIR="temp_package"
 OUTPUT_DIR="dist"
@@ -36,16 +36,12 @@ mkdir "$TEMP_DIR"
 
 echo -e "${YELLOW}📁 Copying extension files...${NC}"
 
-# Copy essential files only (exclude development files)
-cp manifest.json "$TEMP_DIR/"
-cp content.js "$TEMP_DIR/"
-cp popup.html "$TEMP_DIR/"
-cp popup.js "$TEMP_DIR/"
-cp styles.css "$TEMP_DIR/"
-cp README.md "$TEMP_DIR/"
+# Copy the entire src directory structure
+cp -r src/* "$TEMP_DIR/"
 
-# Copy icons directory
-cp -r icons "$TEMP_DIR/"
+# Copy essential root files
+cp README.md "$TEMP_DIR/" 2>/dev/null || echo "README.md not found, skipping..."
+cp PRIVACY_POLICY.md "$TEMP_DIR/" 2>/dev/null || echo "PRIVACY_POLICY.md not found, skipping..."
 
 echo -e "${YELLOW}🧹 Cleaning up files for production...${NC}"
 

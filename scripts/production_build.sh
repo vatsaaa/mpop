@@ -8,31 +8,31 @@ echo "🏭 Creating production build..."
 # Create production directory
 mkdir -p production
 
-# Copy all files to production
-cp -r * production/ 2>/dev/null || true
-cp -r icons production/ 2>/dev/null || true
+# Copy src directory structure to production
+cp -r src/* production/
 
-# Remove development files from production
-cd production
-rm -f package.sh test_extension.sh DEVELOPMENT.md SUBMISSION_CHECKLIST.md STORE_LISTING.md test.js install.sh test_report.html
-rm -f production_build.sh
+# Copy essential root files
+cp README.md production/ 2>/dev/null || true
+cp PRIVACY_POLICY.md production/ 2>/dev/null || true
 
-# Remove console.log statements from JavaScript files
+# Remove debug statements from JavaScript files
 echo "🧹 Removing debug statements from JavaScript files..."
 
+cd production
+
 # Remove console.log from content.js
-sed -i.bak '/console\.log/d' content.js
-echo "✓ Cleaned content.js"
+sed -i.bak '/console\.log/d' content/content.js
+echo "✓ Cleaned content/content.js"
 
 # Remove console.log from popup.js  
-sed -i.bak '/console\.log/d' popup.js
-echo "✓ Cleaned popup.js"
+sed -i.bak '/console\.log/d' popup/popup.js
+echo "✓ Cleaned popup/popup.js"
 
 # Remove .bak files
-rm -f *.bak
+rm -f *.bak content/*.bak popup/*.bak
 
 # Verify no console.log statements remain
-remaining_logs=$(grep -r "console\.log" *.js | wc -l)
+remaining_logs=$(find . -name "*.js" -exec grep -l "console\.log" {} \; | wc -l)
 if [ $remaining_logs -eq 0 ]; then
     echo "✅ All debug statements removed"
 else

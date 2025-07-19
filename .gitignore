@@ -3,6 +3,8 @@
 # Build and Distribution
 dist/
 build/
+production/
+temp_package/
 *.zip
 *.crx
 *.pem
@@ -59,6 +61,7 @@ Thumbs.db
 test_report.html
 coverage/
 .nyc_output/
+tests/output/
 
 # Environment variables
 .env
@@ -77,7 +80,7 @@ key.pem
 
 # Generated icons (if auto-generated)
 # Uncomment if you generate icons automatically
-# icons/icon*.png
+# src/assets/icons/icon*.png
 
 # Archive files
 *.tar.gz
