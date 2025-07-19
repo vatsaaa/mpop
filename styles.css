@@ -1,0 +1,72 @@
+/* Medium Public Only Posts - Styles */
+
+/* Hide member-only content smoothly */
+[data-mpop-hidden] {
+    display: none !important;
+    opacity: 0 !important;
+    height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    transition: opacity 0.3s ease-out !important;
+}
+
+/* Hide spacing elements that are marked as hidden */
+[data-mpop-spacer-hidden] {
+    display: none !important;
+}
+
+/* Ensure member-only overlays are also hidden */
+.member-preview-overlay,
+.paywall-preview,
+.meter-card {
+    display: none !important;
+}
+
+/* Clean up layout gaps left by hidden stories - be very specific */
+[data-testid="storyPreview"][data-mpop-hidden] + [data-testid="storyPreview"]:not([data-mpop-hidden]) {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.js-postListHandle[data-mpop-hidden] + .js-postListHandle:not([data-mpop-hidden]) {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+article[data-mpop-hidden] + article:not([data-mpop-hidden]) {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Ensure first visible story has no top margin */
+[data-testid="storyPreview"]:not([data-mpop-hidden]):first-of-type,
+.js-postListHandle:not([data-mpop-hidden]):first-of-type,
+article:not([data-mpop-hidden]):first-of-type {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Add a subtle indicator for debugging (only visible in dev mode) */
+body[data-mpop-debug="true"] [data-mpop-hidden]::before {
+    content: "MPOP: Hidden member-only story";
+    display: block;
+    background: #ff0000;
+    color: white;
+    padding: 2px 4px;
+    font-size: 10px;
+    position: absolute;
+    z-index: 10000;
+}
+
+/* Add a subtle indicator for debugging (only visible in dev mode) */
+body[data-mpop-debug="true"] [data-mpop-hidden]::before {
+    content: "MPOP: Hidden member-only story";
+    display: block;
+    background: #ff0000;
+    color: white;
+    padding: 2px 4px;
+    font-size: 10px;
+    position: absolute;
+    z-index: 10000;
+}
