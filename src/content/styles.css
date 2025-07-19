@@ -1,7 +1,7 @@
 /* Medium Public Only Posts - Styles */
 
 /* Hide member-only content smoothly */
-[data-mpop-hidden] {
+[data-mpop-hidden="block"] {
     display: none !important;
     opacity: 0 !important;
     height: 0 !important;
@@ -9,6 +9,20 @@
     padding: 0 !important;
     overflow: hidden !important;
     transition: opacity 0.3s ease-out !important;
+}
+
+/* Hide member-only content in grid layouts while maintaining structure */
+[data-mpop-hidden="grid"] {
+    visibility: hidden !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    transition: opacity 0.3s ease-out !important;
+    /* Maintain grid position but make invisible and collapsed */
+    position: relative !important;
 }
 
 /* Hide spacing elements that are marked as hidden */
@@ -48,6 +62,24 @@
 article[data-mpop-hidden] + article:not([data-mpop-hidden]) {
     margin-top: 0 !important;
     padding-top: 0 !important;
+}
+
+/* Grid layout preservation */
+[style*="display: grid"]:has([data-mpop-hidden="grid"]),
+[class*="grid"]:has([data-mpop-hidden="grid"]),
+[style*="display: flex"]:has([data-mpop-hidden="grid"]),
+[class*="flex"]:has([data-mpop-hidden="grid"]) {
+    /* Ensure grid/flex containers handle hidden items properly */
+    gap: 0 !important;
+}
+
+/* Improve grid column behavior when items are hidden */
+[data-mpop-hidden="grid"] {
+    /* Make sure grid items take no space but maintain grid position */
+    grid-column: auto !important;
+    grid-row: auto !important;
+    flex: 0 0 0 !important;
+    width: 0 !important;
 }
 
 /* Ensure first visible story has no top margin */
